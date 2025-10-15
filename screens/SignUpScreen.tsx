@@ -9,7 +9,9 @@ import {
   TouchableOpacity,
   View,
 } from "react-native";
+import { GoogleSignInButton } from "../components/GoogleSignInButton";
 import { useToast } from "../contexts/ToastContext";
+import { supabase } from "../services/supabaseClient";
 import { UserService } from "../services/userService";
 import {
   isValidEmail,
@@ -91,6 +93,33 @@ export const SignUpScreen: React.FC<SignUpScreenProps> = ({ navigation }) => {
     navigation.navigate("SignIn");
   };
 
+  const handleGoogleSignUpSuccess = async () => {
+    showToast("Account created successfully!", "success");
+
+    // Check if user has a profile, if not navigate to onboarding
+    try {
+      const {
+        data: { user },
+      } = await supabase.auth.getUser();
+      if (user) {
+        const { data: profile } = await UserService.getProfile(user.id);
+
+        // If profile exists and is complete, navigate to sign-in (shouldn't happen for new users)
+        // Otherwise, navigate to account type selection
+        if (profile && profile.full_name && profile.age > 0) {
+          setTimeout(() => navigation.navigate("SignIn"), 100);
+        } else {
+          setTimeout(() => navigation.navigate("Step0AccountType"), 100);
+        }
+      } else {
+        setTimeout(() => navigation.navigate("Step0AccountType"), 100);
+      }
+    } catch (profileError) {
+      console.error("SignUp: Error checking profile:", profileError);
+      setTimeout(() => navigation.navigate("Step0AccountType"), 100);
+    }
+  };
+
   return (
     <KeyboardAvoidingView
       style={styles.container}
@@ -141,6 +170,14 @@ export const SignUpScreen: React.FC<SignUpScreenProps> = ({ navigation }) => {
                 {loading ? "Creating Account..." : "Sign Up"}
               </Text>
             </TouchableOpacity>
+
+            <View style={styles.divider}>
+              <View style={styles.dividerLine} />
+              <Text style={styles.dividerText}>OR</Text>
+              <View style={styles.dividerLine} />
+            </View>
+
+            <GoogleSignInButton onSuccess={handleGoogleSignUpSuccess} />
 
             <TouchableOpacity
               style={styles.linkButton}
@@ -216,5 +253,21 @@ const styles = StyleSheet.create({
   linkText: {
     color: "#FF6B6B",
     fontSize: 16,
+  },
+  divider: {
+    flexDirection: "row",
+    alignItems: "center",
+    marginVertical: 0,
+  },
+  dividerLine: {
+    flex: 1,
+    height: 1,
+    backgroundColor: "#ddd",
+  },
+  dividerText: {
+    marginHorizontal: 16,
+    color: "#666",
+    fontSize: 14,
+    fontWeight: "500",
   },
 });
