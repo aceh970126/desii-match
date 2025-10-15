@@ -1,5 +1,5 @@
 -- ============================================================================
--- COMPLETE FROM-SCRATCH SUPABASE SETUP FOR TOGETHER APP
+-- COMPLETE FROM-SCRATCH SUPABASE SETUP FOR DESIIMATCH
 -- ============================================================================
 -- Run this script in your Supabase SQL Editor.
 -- WARNING: This script DROPS and recreates tables. Back up data first.

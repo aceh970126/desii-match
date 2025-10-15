@@ -216,7 +216,7 @@ const AppContent: React.FC = () => {
 
     const handleAppStateChange = async (nextAppState: AppStateStatus) => {
       logger.log(
-        `App: AppState changed to: ${nextAppState}, User exists: ${!!user}`
+        `AppState changed to: ${nextAppState}, User exists: ${!!user}`
       );
 
       if (!user) {
@@ -615,7 +615,7 @@ const AppContent: React.FC = () => {
     return (
       <View style={styles.loadingContainer}>
         <Text style={styles.loveIcon}>💕</Text>
-        <Text style={styles.loadingText}>Wherever you are</Text>
+        <Text style={styles.loadingText}>DesiiMatch</Text>
         <Text style={styles.loadingSubtext}>Loading...</Text>
         <StatusBar style="auto" />
       </View>

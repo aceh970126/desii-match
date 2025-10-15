@@ -1,4 +1,4 @@
-# Wherever You Are - React Native Dating App
+# DesiiMatch - React Native Dating App
 
 A modern React Native dating application built with Expo and Supabase.
 
@@ -61,4 +61,4 @@ eas build --platform android
 
 ---
 
-**Made with 💕 - Wherever you are**
+**Made with 💕 - DesiiMatch**

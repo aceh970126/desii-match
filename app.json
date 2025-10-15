@@ -1,11 +1,11 @@
 {
   "expo": {
-    "name": "Wherever you are",
-    "slug": "togetherApp",
+    "name": "DesiiMatch",
+    "slug": "DesiiMatch",
     "version": "1.0.0",
     "orientation": "portrait",
     "icon": "./assets/images/icon.png",
-    "scheme": "togetherapp",
+    "scheme": "desiimatch",
     "userInterfaceStyle": "automatic",
     "newArchEnabled": true,
     "main": "index.js",
@@ -33,7 +33,7 @@
         "android.permission.READ_EXTERNAL_STORAGE",
         "android.permission.WRITE_EXTERNAL_STORAGE"
       ],
-      "package": "com.twistzz.togetherApp"
+      "package": "com.twistzz.desiimatch"
     },
     "web": {
       "output": "static",

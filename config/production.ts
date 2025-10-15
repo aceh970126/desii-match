@@ -39,7 +39,7 @@ export const productionConfig = {
 
   // App metadata
   app: {
-    name: "TogetherApp",
+    name: "DesiiMatch",
     version: "1.0.0",
     buildNumber: "1",
   },

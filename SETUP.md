@@ -31,8 +31,8 @@ EXPO_PUBLIC_SUPABASE_ANON_KEY=your_supabase_anon_key
 
 ## 4) Mobile Deep Linking
 
-- App scheme: `togetherapp`
-- Callback: `togetherapp://auth/callback`
+- App scheme: `desiimatch`
+- Callback: `desiimatch://auth/callback`
 
 ## 5) Start in Development
 

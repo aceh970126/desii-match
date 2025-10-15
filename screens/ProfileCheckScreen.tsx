@@ -67,7 +67,7 @@ export const ProfileCheckScreen: React.FC<ProfileCheckScreenProps> = ({
   return (
     <View style={styles.container}>
       <Text style={styles.loveIcon}>💕</Text>
-      <Text style={styles.loadingText}>Wherever you are</Text>
+      <Text style={styles.loadingText}>DesiiMatch</Text>
       <Text style={styles.loadingSubtext}>Checking your profile...</Text>
     </View>
   );

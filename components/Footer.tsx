@@ -11,7 +11,7 @@ export const Footer: React.FC<FooterProps> = ({ children, style }) => {
     <View style={[styles.container, style]}>
       {children || (
         <View style={styles.defaultContent}>
-          <Text style={styles.defaultText}>Wherever you are</Text>
+          <Text style={styles.defaultText}>DesiiMatch</Text>
         </View>
       )}
     </View>

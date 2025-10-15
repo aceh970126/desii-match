@@ -24,15 +24,15 @@ EXPO_PUBLIC_SUPABASE_ANON_KEY=your_supabase_anon_key
 
 ## 5) Deep Links and Redirects
 
-- App scheme: `togetherapp`
-- App callback: `togetherapp://auth/callback`
+- App scheme: `desiimatch`
+- App callback: `desiimatch://auth/callback`
 
 In Supabase → Authentication → URL configuration:
 
-- Site URL: `togetherapp://`
+- Site URL: `desiimatch://`
 - Redirect URLs:
-  - `togetherapp://*`
-  - `togetherapp://auth/callback`
+  - `desiimatch://*`
+  - `desiimatch://auth/callback`
 
 ## 6) Google OAuth (via Supabase)
 
@@ -60,5 +60,5 @@ npx expo start --clear
 ## Troubleshooting
 
 - Redirect goes to localhost: update Supabase Site URL and Redirect URLs as above
-- "Invalid redirect": ensure `togetherapp://*` is added
+- "Invalid redirect": ensure `desiimatch://*` is added
 - Session missing: verify deep link handling and polyfill import
