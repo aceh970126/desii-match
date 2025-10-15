@@ -102,6 +102,10 @@ CREATE POLICY "Users can view their own profile"
 ON profiles FOR SELECT
 USING (user_id = auth.uid());
 
+CREATE POLICY "Users can view all profiles for discovery"
+ON profiles FOR SELECT
+USING (auth.uid() IS NOT NULL);
+
 CREATE POLICY "Users can update their own profile"
 ON profiles FOR UPDATE
 USING (user_id = auth.uid())
@@ -127,27 +131,70 @@ CREATE INDEX idx_user_presence_last_seen ON user_presence(last_seen DESC);
 
 ALTER TABLE user_presence ENABLE ROW LEVEL SECURITY;
 
+-- Drop all existing policies on user_presence
 DROP POLICY IF EXISTS "Anyone can view presence" ON user_presence;
 DROP POLICY IF EXISTS "Users can update their own presence" ON user_presence;
 DROP POLICY IF EXISTS "Users can insert their own presence" ON user_presence;
 DROP POLICY IF EXISTS "Users can delete their own presence" ON user_presence;
 
-CREATE POLICY "Anyone can view presence"
-ON user_presence FOR SELECT
-USING (true);
+-- Create new policies with more permissive rules
+DO $$
+BEGIN
+    -- Anyone can view presence
+    IF NOT EXISTS (
+        SELECT 1 FROM pg_policies 
+        WHERE tablename = 'user_presence' 
+        AND policyname = 'Anyone can view presence'
+    ) THEN
+        EXECUTE 'CREATE POLICY "Anyone can view presence" ON user_presence FOR SELECT USING (true)';
+    END IF;
 
-CREATE POLICY "Users can update their own presence"
-ON user_presence FOR UPDATE
-USING (user_id IN (SELECT id FROM profiles WHERE user_id = auth.uid()))
-WITH CHECK (user_id IN (SELECT id FROM profiles WHERE user_id = auth.uid()));
+    -- Allow authenticated users to update any presence (for signout scenarios)
+    IF NOT EXISTS (
+        SELECT 1 FROM pg_policies 
+        WHERE tablename = 'user_presence' 
+        AND policyname = 'Authenticated users can update presence'
+    ) THEN
+        EXECUTE 'CREATE POLICY "Authenticated users can update presence" ON user_presence FOR UPDATE USING (auth.uid() IS NOT NULL)';
+    END IF;
 
-CREATE POLICY "Users can insert their own presence"
-ON user_presence FOR INSERT
-WITH CHECK (user_id IN (SELECT id FROM profiles WHERE user_id = auth.uid()));
+    -- Allow authenticated users to insert presence
+    IF NOT EXISTS (
+        SELECT 1 FROM pg_policies 
+        WHERE tablename = 'user_presence' 
+        AND policyname = 'Authenticated users can insert presence'
+    ) THEN
+        EXECUTE 'CREATE POLICY "Authenticated users can insert presence" ON user_presence FOR INSERT WITH CHECK (auth.uid() IS NOT NULL)';
+    END IF;
 
-CREATE POLICY "Users can delete their own presence"
-ON user_presence FOR DELETE
-USING (user_id IN (SELECT id FROM profiles WHERE user_id = auth.uid()));
+    -- Allow authenticated users to delete presence
+    IF NOT EXISTS (
+        SELECT 1 FROM pg_policies 
+        WHERE tablename = 'user_presence' 
+        AND policyname = 'Authenticated users can delete presence'
+    ) THEN
+        EXECUTE 'CREATE POLICY "Authenticated users can delete presence" ON user_presence FOR DELETE USING (auth.uid() IS NOT NULL)';
+    END IF;
+END $$;
+
+-- Helper function to ensure presence is created for new profiles
+CREATE OR REPLACE FUNCTION ensure_presence_for_profile()
+RETURNS TRIGGER AS $$
+BEGIN
+  -- Insert default offline presence for new profile
+  INSERT INTO user_presence (user_id, online, last_seen)
+  VALUES (NEW.id, false, NOW())
+  ON CONFLICT (user_id) DO NOTHING;
+  
+  RETURN NEW;
+END;
+$$ LANGUAGE plpgsql SECURITY DEFINER;
+
+DROP TRIGGER IF EXISTS trg_profiles_ensure_presence ON profiles;
+CREATE TRIGGER trg_profiles_ensure_presence
+AFTER INSERT ON profiles
+FOR EACH ROW
+EXECUTE FUNCTION ensure_presence_for_profile();
 
 -- --------------------------------------------------------------------------
 -- CONVERSATIONS (between two profiles)
@@ -358,6 +405,42 @@ ON dislikes FOR DELETE
 USING (
   user_id IN (SELECT id FROM profiles WHERE user_id = auth.uid())
 );
+
+-- --------------------------------------------------------------------------
+-- STORAGE SETUP: Avatar uploads
+-- --------------------------------------------------------------------------
+
+-- Create storage bucket for avatars
+INSERT INTO storage.buckets (id, name, public)
+VALUES ('avatars', 'avatars', true)
+ON CONFLICT (id) DO NOTHING;
+
+-- RLS Policies for avatar storage
+-- Allow authenticated users to upload avatars (any filename for now)
+CREATE POLICY "Authenticated users can upload avatars"
+ON storage.objects FOR INSERT
+WITH CHECK (
+  bucket_id = 'avatars' 
+  AND auth.uid() IS NOT NULL
+);
+
+CREATE POLICY "Authenticated users can update avatars"
+ON storage.objects FOR UPDATE
+USING (
+  bucket_id = 'avatars' 
+  AND auth.uid() IS NOT NULL
+);
+
+CREATE POLICY "Authenticated users can delete avatars"
+ON storage.objects FOR DELETE
+USING (
+  bucket_id = 'avatars' 
+  AND auth.uid() IS NOT NULL
+);
+
+CREATE POLICY "Anyone can view avatars"
+ON storage.objects FOR SELECT
+USING (bucket_id = 'avatars');
 
 -- --------------------------------------------------------------------------
 -- DONE

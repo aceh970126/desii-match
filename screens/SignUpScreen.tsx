@@ -1,4 +1,4 @@
-import React, { useState } from "react";
+import React, { useRef, useState } from "react";
 import {
   KeyboardAvoidingView,
   Platform,
@@ -29,6 +29,7 @@ export const SignUpScreen: React.FC<SignUpScreenProps> = ({ navigation }) => {
   const [confirmPassword, setConfirmPassword] = useState("");
   const [loading, setLoading] = useState(false);
   const { showToast } = useToast();
+  const confirmPasswordRef = useRef<TextInput>(null);
 
   const validateForm = () => {
     // Sanitize inputs
@@ -150,15 +151,23 @@ export const SignUpScreen: React.FC<SignUpScreenProps> = ({ navigation }) => {
               onChangeText={setPassword}
               secureTextEntry
               autoCapitalize="none"
+              onSubmitEditing={() => {
+                // Focus on confirm password field
+                confirmPasswordRef.current?.focus();
+              }}
+              returnKeyType="next"
             />
 
             <TextInput
+              ref={confirmPasswordRef}
               style={styles.input}
               placeholder="Confirm Password"
               value={confirmPassword}
               onChangeText={setConfirmPassword}
               secureTextEntry
               autoCapitalize="none"
+              onSubmitEditing={handleSignUp}
+              returnKeyType="done"
             />
 
             <TouchableOpacity

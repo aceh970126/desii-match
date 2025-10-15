@@ -56,6 +56,14 @@ export const Step4Preview: React.FC<Step4PreviewProps> = ({ navigation }) => {
     try {
       console.log("Uploading avatar with URI:", avatarUri);
 
+      // Get current user ID for folder organization
+      const {
+        data: { user },
+      } = await supabase.auth.getUser();
+      if (!user) {
+        throw new Error("User not authenticated");
+      }
+
       // For React Native, we need to fetch the image as base64 or use FormData
       const response = await fetch(avatarUri);
 
@@ -65,12 +73,13 @@ export const Step4Preview: React.FC<Step4PreviewProps> = ({ navigation }) => {
       console.log("Avatar array buffer size:", arrayBuffer.byteLength, "bytes");
 
       const fileExt = avatarUri.split(".").pop() || "jpg";
-      const fileName = `${Date.now()}.${fileExt}`;
+      const fileName = `${user.id}/avatar_${Date.now()}.${fileExt}`;
 
       const { data, error } = await supabase.storage
         .from("avatars")
         .upload(fileName, arrayBuffer, {
           contentType: `image/${fileExt}`,
+          upsert: true, // Replace existing avatar
         });
 
       if (error) {
@@ -105,16 +114,10 @@ export const Step4Preview: React.FC<Step4PreviewProps> = ({ navigation }) => {
         return;
       }
 
-      // Check if user already has a profile (to get account_type)
-      const { data: existingProfile } = await supabase
-        .from("profiles")
-        .select("account_type")
-        .eq("user_id", user.id)
-        .single();
-
-      const isIndividualAccount =
-        !existingProfile || existingProfile.account_type === "individual";
-      console.log("Step4Preview: Is individual account?", isIndividualAccount);
+      // Get account type from onboarding data
+      const accountType = onboardingData.accountType || "individual";
+      const isIndividualAccount = accountType === "individual";
+      console.log("Step4Preview: Account type from onboarding:", accountType);
 
       let avatarUrl = null;
       if (onboardingData.avatar) {
@@ -133,7 +136,7 @@ export const Step4Preview: React.FC<Step4PreviewProps> = ({ navigation }) => {
         bio: onboardingData.bio,
         avatar: avatarUrl || undefined,
         interests: onboardingData.interests,
-        account_type: isIndividualAccount ? "individual" : "family",
+        account_type: accountType,
         is_active: isIndividualAccount, // true for individual, false for family (will activate a profile later)
       };
 

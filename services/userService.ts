@@ -24,26 +24,7 @@ export class UserService {
       password,
     });
 
-    // If signup successful, create empty profile (account type will be set in onboarding)
-    if (data.user && !error) {
-      try {
-        const { error: profileError } = await supabase.from("profiles").insert({
-          user_id: data.user.id,
-          full_name: "", // Will be filled during onboarding
-          gender: "",
-          age: 0,
-          bio: "",
-          account_type: "individual", // Default, will be updated in Step0AccountType
-        });
-
-        if (profileError) {
-          logger.error("Error creating profile:", profileError);
-        }
-      } catch (profileError) {
-        logger.error("Exception creating profile:", profileError);
-      }
-    }
-
+    // Profile will be created after sign-in when user is authenticated
     return { data, error };
   }
 
@@ -63,25 +44,80 @@ export class UserService {
           const { data: activeProfile } = await UserService.getActiveProfile();
 
           if (activeProfile) {
-            // Use upsert to handle both insert and update in one operation
-            const { error } = await supabase.from("user_presence").upsert(
-              {
-                user_id: activeProfile.id,
-                online: false,
-                last_seen: new Date().toISOString(),
-              },
-              {
-                onConflict: "user_id",
-              }
-            );
+            // Try multiple approaches to update presence
+            let presenceUpdated = false;
 
-            if (error) {
-              logger.error("UserService: Error upserting presence:", error);
-              logger.log(
-                "UserService: This is expected if RLS policies haven't been updated yet"
+            // Approach 1: Try upsert
+            try {
+              const { error } = await supabase.from("user_presence").upsert(
+                {
+                  user_id: activeProfile.id,
+                  online: false,
+                  last_seen: new Date().toISOString(),
+                },
+                {
+                  onConflict: "user_id",
+                }
               );
-            } else {
-              logger.log("UserService: Profile presence set to offline");
+
+              if (!error) {
+                logger.log("UserService: Presence updated via upsert");
+                presenceUpdated = true;
+              } else {
+                logger.error("UserService: Upsert failed:", error);
+              }
+            } catch (upsertError) {
+              logger.error("UserService: Upsert exception:", upsertError);
+            }
+
+            // Approach 2: Try direct update if upsert failed
+            if (!presenceUpdated) {
+              try {
+                const { error } = await supabase
+                  .from("user_presence")
+                  .update({
+                    online: false,
+                    last_seen: new Date().toISOString(),
+                  })
+                  .eq("user_id", activeProfile.id);
+
+                if (!error) {
+                  logger.log("UserService: Presence updated via direct update");
+                  presenceUpdated = true;
+                } else {
+                  logger.error("UserService: Direct update failed:", error);
+                }
+              } catch (updateError) {
+                logger.error(
+                  "UserService: Direct update exception:",
+                  updateError
+                );
+              }
+            }
+
+            // Approach 3: Try insert if both failed (profile might not have presence record)
+            if (!presenceUpdated) {
+              try {
+                const { error } = await supabase.from("user_presence").insert({
+                  user_id: activeProfile.id,
+                  online: false,
+                  last_seen: new Date().toISOString(),
+                });
+
+                if (!error) {
+                  logger.log("UserService: Presence created via insert");
+                } else {
+                  logger.error("UserService: Insert failed:", error);
+                }
+              } catch (insertError) {
+                logger.error("UserService: Insert exception:", insertError);
+              }
+            }
+
+            if (!presenceUpdated) {
+              logger.log(
+                "UserService: All presence update attempts failed, continuing with signout"
+              );
             }
           } else {
             logger.log(
@@ -371,7 +407,7 @@ export class UserService {
   // Storage methods
   static async uploadAvatar(file: File, userId: string) {
     const fileExt = file.name.split(".").pop();
-    const fileName = `${userId}.${fileExt}`;
+    const fileName = `${userId}/avatar_${Date.now()}.${fileExt}`;
 
     const { error } = await supabase.storage
       .from("avatars")

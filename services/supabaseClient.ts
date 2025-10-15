@@ -73,4 +73,5 @@ export interface OnboardingData {
   bio: string;
   interests: string[];
   avatar?: string;
+  accountType?: string;
 }

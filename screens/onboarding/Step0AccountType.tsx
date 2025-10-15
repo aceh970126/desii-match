@@ -10,6 +10,7 @@ import {
   TouchableOpacity,
   View,
 } from "react-native";
+import { useOnboarding } from "../../contexts/OnboardingContext";
 import { useToast } from "../../contexts/ToastContext";
 import { supabase } from "../../services/supabaseClient";
 import { UserService } from "../../services/userService";
@@ -27,6 +28,7 @@ export const Step0AccountType: React.FC<Step0AccountTypeProps> = ({
   const [loading, setLoading] = useState(false);
   const [checking, setChecking] = useState(true);
   const { showToast } = useToast();
+  const { updateOnboardingData } = useOnboarding();
 
   useEffect(() => {
     checkExistingProfile();
@@ -91,17 +93,8 @@ export const Step0AccountType: React.FC<Step0AccountTypeProps> = ({
         return;
       }
 
-      // Update profile with account type
-      const { error } = await supabase
-        .from("profiles")
-        .update({ account_type: accountType })
-        .eq("user_id", user.id);
-
-      if (error) {
-        console.error("Error updating account type:", error);
-        showToast("Failed to save account type", "error");
-        return;
-      }
+      // Store account type in onboarding context (will be used when creating profile)
+      updateOnboardingData({ accountType });
 
       // Navigate based on account type
       if (accountType === "family") {

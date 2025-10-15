@@ -39,33 +39,53 @@ const AppContent: React.FC = () => {
         }`
       );
 
+      // Check if user is still authenticated
+      const {
+        data: { user },
+      } = await supabase.auth.getUser();
+      if (!user) {
+        logger.log("User not authenticated, skipping presence update");
+        return;
+      }
+
       // Use upsert to handle both insert and update in one operation
-      const { error } = await supabase.from("user_presence").upsert(
-        {
-          user_id: profileId,
-          online: online,
-          last_seen: new Date().toISOString(),
-        },
-        {
-          onConflict: "user_id", // Specify the unique constraint column
-        }
-      );
+      const { data, error } = await supabase
+        .from("user_presence")
+        .upsert(
+          {
+            user_id: profileId,
+            online: online,
+            last_seen: new Date().toISOString(),
+          },
+          {
+            onConflict: "user_id", // Specify the unique constraint column
+          }
+        )
+        .select();
 
       if (error) {
-        // Suppress RLS policy errors during cleanup - they're expected if user already signed out
-        if (error.code === "42501") {
-          logger.log(
-            "Presence update skipped: User session no longer valid (expected during signout)"
-          );
-        } else {
-          logger.error("Error upserting presence:", error);
-          logger.log(
-            "This error can occur if RLS policies haven't been updated. Run FIX_USER_PRESENCE_RLS.sql in your Supabase SQL Editor."
-          );
-        }
+        logger.error("Error upserting presence:", error);
+        logger.error("Error details:", {
+          code: error.code,
+          message: error.message,
+          details: error.details,
+          hint: error.hint,
+        });
+
+        // Try to get more info about the profile
+        const { data: profileData } = await supabase
+          .from("profiles")
+          .select("id, user_id, full_name")
+          .eq("id", profileId)
+          .single();
+
+        logger.log("Profile data for presence update:", profileData);
       } else {
         logger.log(
-          `Profile presence upserted: ${online ? "online" : "offline"}`
+          `Profile presence upserted successfully: ${
+            online ? "online" : "offline"
+          }`,
+          data
         );
       }
     } catch (error) {

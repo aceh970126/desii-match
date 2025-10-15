@@ -18,6 +18,7 @@ const initialData: OnboardingData = {
   bio: "",
   interests: [],
   avatar: undefined,
+  accountType: "individual", // Default to individual
 };
 
 interface OnboardingProviderProps {

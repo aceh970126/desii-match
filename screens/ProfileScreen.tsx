@@ -216,18 +216,27 @@ export const ProfileScreen: React.FC<ProfileScreenProps> = ({ navigation }) => {
     try {
       console.log("Uploading avatar with URI:", avatarUri);
 
+      // Get current user ID for folder organization
+      const {
+        data: { user },
+      } = await supabase.auth.getUser();
+      if (!user) {
+        throw new Error("User not authenticated");
+      }
+
       const response = await fetch(avatarUri);
       const arrayBuffer = await response.arrayBuffer();
 
       console.log("Avatar array buffer size:", arrayBuffer.byteLength, "bytes");
 
       const fileExt = avatarUri.split(".").pop() || "jpg";
-      const fileName = `${Date.now()}.${fileExt}`;
+      const fileName = `${user.id}/avatar_${Date.now()}.${fileExt}`;
 
       const { data, error } = await supabase.storage
         .from("avatars")
         .upload(fileName, arrayBuffer, {
           contentType: `image/${fileExt}`,
+          upsert: true, // Replace existing avatar
         });
 
       if (error) {

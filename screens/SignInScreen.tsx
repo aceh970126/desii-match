@@ -72,7 +72,7 @@ export const SignInScreen: React.FC<SignInScreenProps> = ({ navigation }) => {
       } else {
         showToast("Welcome back!", "success");
 
-        // Check if user has a complete profile immediately after sign-in
+        // Check if user has a complete profile
         try {
           const {
             data: { user },
@@ -101,9 +101,9 @@ export const SignInScreen: React.FC<SignInScreenProps> = ({ navigation }) => {
                 );
                 setTimeout(() => navigation.navigate("FamilyDashboard"), 100);
               } else {
-                // User has incomplete or no profile, navigate to account type selection
+                // User has no profile or incomplete profile, navigate to account type selection
                 console.log(
-                  "SignIn: User has incomplete profile, navigating to Step0AccountType"
+                  "SignIn: User needs to complete profile setup, navigating to Step0AccountType"
                 );
                 setTimeout(() => navigation.navigate("Step0AccountType"), 100);
               }
