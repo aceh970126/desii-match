@@ -9,6 +9,7 @@ import {
   TouchableOpacity,
   View,
 } from "react-native";
+import { GoogleSignInButton } from "../components/GoogleSignInButton";
 import { useProfileRefresh } from "../contexts/ProfileRefreshContext";
 import { useToast } from "../contexts/ToastContext";
 import { supabase } from "../services/supabaseClient";
@@ -128,6 +129,56 @@ export const SignInScreen: React.FC<SignInScreenProps> = ({ navigation }) => {
     navigation.navigate("SignUp");
   };
 
+  const handleGoogleSignInSuccess = async () => {
+    showToast("Welcome back!", "success");
+
+    // Check if user has a complete profile immediately after sign-in
+    try {
+      const {
+        data: { user },
+      } = await supabase.auth.getUser();
+      if (user) {
+        const { data: profile } = await UserService.getProfile(user.id);
+
+        // Check if profile exists AND is complete (has full_name and age)
+        if (profile && profile.full_name && profile.age > 0) {
+          // User has a complete profile, trigger refresh to show main app
+          console.log(
+            "SignIn: User has complete profile, triggering profile refresh"
+          );
+          triggerProfileRefresh();
+          return; // Don't navigate, let App component handle the routing
+        } else {
+          // Check if user has family member profiles (family account)
+          const { data: profiles } = await UserService.getManagedProfiles();
+          const secondaryProfiles =
+            profiles?.filter((p) => p.account_type === "family") || [];
+
+          if (secondaryProfiles.length > 0) {
+            // Has family member profiles, go directly to Family Dashboard
+            console.log(
+              "SignIn: User has family member profiles, navigating to Family Dashboard"
+            );
+            setTimeout(() => navigation.navigate("FamilyDashboard"), 100);
+          } else {
+            // User has incomplete or no profile, navigate to account type selection
+            console.log(
+              "SignIn: User has incomplete profile, navigating to Step0AccountType"
+            );
+            setTimeout(() => navigation.navigate("Step0AccountType"), 100);
+          }
+        }
+      } else {
+        // Fallback to account type selection
+        setTimeout(() => navigation.navigate("Step0AccountType"), 100);
+      }
+    } catch (profileError) {
+      console.error("SignIn: Error checking profile:", profileError);
+      // Fallback to account type selection
+      setTimeout(() => navigation.navigate("Step0AccountType"), 100);
+    }
+  };
+
   return (
     <KeyboardAvoidingView
       style={styles.container}
@@ -169,6 +220,14 @@ export const SignInScreen: React.FC<SignInScreenProps> = ({ navigation }) => {
                 {loading ? "Signing In..." : "Sign In"}
               </Text>
             </TouchableOpacity>
+
+            <View style={styles.divider}>
+              <View style={styles.dividerLine} />
+              <Text style={styles.dividerText}>OR</Text>
+              <View style={styles.dividerLine} />
+            </View>
+
+            <GoogleSignInButton onSuccess={handleGoogleSignInSuccess} />
 
             <TouchableOpacity
               style={styles.linkButton}
@@ -244,5 +303,21 @@ const styles = StyleSheet.create({
   linkText: {
     color: "#FF6B6B",
     fontSize: 16,
+  },
+  divider: {
+    flexDirection: "row",
+    alignItems: "center",
+    marginVertical: 0,
+  },
+  dividerLine: {
+    flex: 1,
+    height: 1,
+    backgroundColor: "#ddd",
+  },
+  dividerText: {
+    marginHorizontal: 16,
+    color: "#666",
+    fontSize: 14,
+    fontWeight: "500",
   },
 });
