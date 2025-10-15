@@ -1,3 +1,4 @@
+import { Ionicons } from "@expo/vector-icons";
 import * as Linking from "expo-linking";
 import * as WebBrowser from "expo-web-browser";
 import React, { useCallback, useState } from "react";
@@ -55,19 +56,32 @@ export const GoogleSignInButton: React.FC<GoogleSignInButtonProps> = ({
     }
   }, [onSuccess]);
 
+  const primary = "#FF6B6B"; // match SignInScreen styles.button background
+
   return (
     <Pressable
-      style={({ pressed }) => [styles.button, pressed && styles.pressed]}
+      style={({ pressed }) => [
+        styles.button,
+        { borderColor: primary },
+        pressed && styles.pressed,
+      ]}
       onPress={handlePress}
       disabled={loading}
     >
       {loading ? (
-        <View style={styles.loadingRow}>
-          <ActivityIndicator color="#fff" />
-          <Text style={styles.buttonText}>Signing in...</Text>
+        <View style={styles.contentRow}>
+          <ActivityIndicator color={primary} />
+          <Text style={[styles.buttonText, { color: primary }]}>
+            Signing in...
+          </Text>
         </View>
       ) : (
-        <Text style={styles.buttonText}>Continue with Google</Text>
+        <View style={styles.contentRow}>
+          <Ionicons name="logo-google" size={18} color={primary} />
+          <Text style={[styles.buttonText, { color: primary }]}>
+            Continue with Google
+          </Text>
+        </View>
       )}
     </Pressable>
   );
@@ -75,22 +89,22 @@ export const GoogleSignInButton: React.FC<GoogleSignInButtonProps> = ({
 
 const styles = StyleSheet.create({
   button: {
-    backgroundColor: "#4285F4",
+    backgroundColor: "transparent",
     alignItems: "center",
     justifyContent: "center",
-    paddingVertical: 14,
+    paddingVertical: 12,
     borderRadius: 10,
+    borderWidth: 1.5,
   },
   pressed: {
     opacity: 0.85,
   },
-  loadingRow: {
+  contentRow: {
     flexDirection: "row",
     alignItems: "center",
-    gap: 8,
+    gap: 10,
   },
   buttonText: {
-    color: "#fff",
     fontSize: 16,
     fontWeight: "600",
   },

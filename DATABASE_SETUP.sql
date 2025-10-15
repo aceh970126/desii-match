@@ -56,6 +56,35 @@ BEFORE UPDATE ON profiles
 FOR EACH ROW
 EXECUTE FUNCTION set_updated_at();
 
+-- Set user_id from auth.uid() and auto-activate first profile BEFORE RLS check
+CREATE OR REPLACE FUNCTION set_profile_user_id_and_defaults()
+RETURNS TRIGGER AS $$
+DECLARE
+  existing_count integer;
+BEGIN
+  IF auth.uid() IS NULL THEN
+    RAISE EXCEPTION 'Not authenticated';
+  END IF;
+
+  -- Always enforce user_id from the authenticated context
+  NEW.user_id := auth.uid();
+
+  -- If the user has no profiles yet, auto-activate the first one
+  SELECT COUNT(*) INTO existing_count FROM profiles WHERE user_id = auth.uid();
+  IF existing_count = 0 THEN
+    NEW.is_active := true;
+  END IF;
+
+  RETURN NEW;
+END;
+$$ LANGUAGE plpgsql SECURITY DEFINER;
+
+DROP TRIGGER IF EXISTS trg_profiles_set_user_id ON profiles;
+CREATE TRIGGER trg_profiles_set_user_id
+BEFORE INSERT ON profiles
+FOR EACH ROW
+EXECUTE FUNCTION set_profile_user_id_and_defaults();
+
 -- Enable RLS
 ALTER TABLE profiles ENABLE ROW LEVEL SECURITY;
 
