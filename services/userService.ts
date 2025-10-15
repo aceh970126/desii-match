@@ -578,11 +578,24 @@ export class UserService {
         user.id
       );
 
+      // Check if this is the first profile for this user
+      const { data: existingProfiles } = await supabase
+        .from("profiles")
+        .select("id")
+        .eq("user_id", user.id);
+
+      const isFirstProfile = !existingProfiles || existingProfiles.length === 0;
+
+      logger.log(
+        "UserService.createFamilyProfile: Is first profile:",
+        isFirstProfile
+      );
+
       const { data, error } = await supabase
         .from("profiles")
         .insert({
           user_id: user.id, // Same user_id as all other profiles for this user
-          is_active: false, // New profiles start inactive
+          is_active: isFirstProfile, // First profile is active, others inactive
           account_type: "family", // Family member profiles
           ...profileData,
         })

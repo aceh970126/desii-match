@@ -41,6 +41,10 @@ export const FamilyDashboardScreen: React.FC<FamilyDashboardScreenProps> = ({
         showToast("Failed to load profiles", "error");
       } else {
         setProfiles(data || []);
+
+        // Refresh active profile context to ensure it's up to date
+        await refreshProfile();
+        console.log("FamilyDashboard: Active profile context refreshed");
       }
     } catch (error) {
       console.error("Exception loading profiles:", error);
@@ -48,7 +52,7 @@ export const FamilyDashboardScreen: React.FC<FamilyDashboardScreenProps> = ({
     } finally {
       setLoading(false);
     }
-  }, [showToast]);
+  }, [showToast, refreshProfile]);
 
   // Reload profiles when screen comes into focus
   useFocusEffect(
@@ -153,7 +157,7 @@ export const FamilyDashboardScreen: React.FC<FamilyDashboardScreenProps> = ({
 
   const renderProfile = ({ item }: { item: Profile }) => {
     const isPrimary = item.account_type === "individual"; // The first profile created (individual type)
-    const isActive = activeProfile?.id === item.id;
+    const isActive = activeProfile?.id === item.id || item.is_active;
 
     return (
       <View style={styles.childProfileCard}>
