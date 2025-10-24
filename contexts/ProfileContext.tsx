@@ -59,7 +59,7 @@ export const ProfileProvider: React.FC<{ children: ReactNode }> = ({
       setProfile(profileData);
       console.log("ProfileContext: Profile state updated");
     } catch (error) {
-      console.error("ProfileContext: Error loading profile:", error);
+      console.log("ProfileContext: Error loading profile:", error);
       setProfile(null);
     }
   }, []);

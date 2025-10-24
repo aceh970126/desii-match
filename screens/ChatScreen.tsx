@@ -73,7 +73,7 @@ export const ChatScreen: React.FC<ChatScreenProps> = ({ navigation }) => {
         .order("updated_at", { ascending: false });
 
       if (convError) {
-        console.error("ChatScreen: Error loading conversations:", convError);
+        console.log("ChatScreen: Error loading conversations:", convError);
         setLoading(false);
         return;
       }
@@ -153,7 +153,7 @@ export const ChatScreen: React.FC<ChatScreenProps> = ({ navigation }) => {
       setChats(chatsData);
       setLoading(false);
     } catch (error) {
-      console.error("ChatScreen: Error loading conversations:", error);
+      console.log("ChatScreen: Error loading conversations:", error);
       setLoading(false);
     }
   }, [profile]);

@@ -17,6 +17,8 @@ import Animated, {
   useSharedValue,
   withSpring,
 } from "react-native-reanimated";
+import { AnimatedTouchable } from "../components/AnimatedTouchable";
+import { Colors, Spacing } from "../constants/design";
 import { useProfile } from "../contexts/ProfileContext";
 import { useProfileRefresh } from "../contexts/ProfileRefreshContext";
 import { useSubtitle } from "../contexts/SubtitleContext";
@@ -63,26 +65,14 @@ export const DiscoverScreen: React.FC<DiscoverScreenProps> = ({
   const loadProfiles = useCallback(async () => {
     try {
       if (!profile) {
-        console.log("DiscoverScreen: No profile available, skipping load");
         setLoading(false);
         return;
       }
 
-      console.log("DiscoverScreen: loadProfiles called, profile:", {
-        id: profile.id,
-        user_id: profile.user_id,
-        full_name: profile.full_name,
-        account_type: profile.account_type,
-      });
       setLoading(true);
       const { data, error } = await UserService.getAllProfiles();
-      console.log("DiscoverScreen: getAllProfiles result:", {
-        data: data?.length,
-        error,
-      });
 
       if (error) {
-        console.error("DiscoverScreen: Error loading profiles:", error);
         showToast("Failed to load profiles. Please try again.", "error");
         setLoading(false);
         return;
@@ -90,22 +80,8 @@ export const DiscoverScreen: React.FC<DiscoverScreenProps> = ({
 
       // Filter out current user and sort by interest similarity
       let filteredProfiles = data || [];
-      console.log(
-        "DiscoverScreen: Total profiles before filter:",
-        filteredProfiles.length
-      );
 
       if (profile) {
-        console.log(
-          "DiscoverScreen: Starting filtering with current profile:",
-          {
-            id: profile.id,
-            user_id: profile.user_id,
-            full_name: profile.full_name,
-            account_type: profile.account_type,
-          }
-        );
-
         // Exclude profiles already liked or disliked
         const [likedIdsRes, dislikedIdsRes] = await Promise.all([
           UserService.getLikedUserIds(profile.id),
@@ -114,52 +90,33 @@ export const DiscoverScreen: React.FC<DiscoverScreenProps> = ({
         const likedIds: string[] = likedIdsRes.data || [];
         const dislikedIds: string[] = dislikedIdsRes.data || [];
 
-        console.log("DiscoverScreen: Liked IDs:", likedIds);
-        console.log("DiscoverScreen: Disliked IDs:", dislikedIds);
-
         filteredProfiles = filteredProfiles.filter((p) => {
-          console.log(
-            `DiscoverScreen: Checking profile: ${p.full_name} (id: ${p.id}, user_id: ${p.user_id})`
-          );
-
           // Exclude current profile (by profile id)
           if (p.id === profile.id) {
-            console.log(
-              "  ❌ Filtering out current profile (same id):",
-              p.full_name
-            );
             return false;
           }
 
           // Exclude all other profiles from the same auth user (family members)
           // For family accounts, user can have multiple profiles with same user_id
           if (p.user_id === profile.user_id && p.id !== profile.id) {
-            console.log(
-              "  ❌ Filtering out family member profile (same user_id):",
-              p.full_name
-            );
             return false;
           }
 
           // Exclude liked profiles
           if (likedIds.includes(p.id)) {
-            console.log("  ❌ Filtering out liked profile:", p.full_name);
             return false;
           }
 
           // Exclude disliked profiles
           if (dislikedIds.includes(p.id)) {
-            console.log("  ❌ Filtering out disliked profile:", p.full_name);
             return false;
           }
 
-          console.log("  ✅ Keeping profile:", p.full_name);
           return true;
         });
 
         // Sort by interest similarity (most similar first)
         if (profile.interests && profile.interests.length > 0) {
-          console.log("DiscoverScreen: Sorting by interest similarity");
           filteredProfiles.sort((a, b) => {
             const similarityA = calculateInterestSimilarity(
               profile.interests,
@@ -178,42 +135,23 @@ export const DiscoverScreen: React.FC<DiscoverScreenProps> = ({
               profile.interests,
               p.interests || []
             );
-            console.log(
-              `  🎯 Interest match for ${p.full_name}: ${similarity} common interests`
-            );
             return similarity > 0;
           });
-
-          console.log(
-            `DiscoverScreen: Profiles with common interests: ${profilesWithCommonInterests.length} out of ${filteredProfiles.length}`
-          );
 
           // Only filter if there are profiles with common interests
           // Otherwise show all available profiles
           if (profilesWithCommonInterests.length > 0) {
             filteredProfiles = profilesWithCommonInterests;
           } else {
-            console.log(
-              "DiscoverScreen: No profiles with common interests, showing all available profiles"
-            );
           }
         } else {
-          console.log(
-            "DiscoverScreen: Current profile has no interests, showing all available profiles"
-          );
         }
       }
 
-      console.log(
-        "DiscoverScreen: Filtered profiles count:",
-        filteredProfiles.length
-      );
       setProfiles(filteredProfiles);
     } catch (err) {
-      console.error("DiscoverScreen: Exception in loadProfiles:", err);
       showToast("An unexpected error occurred. Please try again.", "error");
     } finally {
-      console.log("DiscoverScreen: Setting loading to false");
       setLoading(false);
     }
   }, [profile, showToast]);
@@ -221,7 +159,6 @@ export const DiscoverScreen: React.FC<DiscoverScreenProps> = ({
   // Load data when screen comes into focus
   useFocusEffect(
     useCallback(() => {
-      console.log("DiscoverScreen: Screen focused, loading profiles");
       setLoading(true);
       setProfiles([]);
       setCurrentIndex(0);
@@ -232,7 +169,6 @@ export const DiscoverScreen: React.FC<DiscoverScreenProps> = ({
   // Reload when refresh trigger changes
   useEffect(() => {
     if (refreshTrigger > 0) {
-      console.log("DiscoverScreen: Profile refresh triggered, reloading");
       refreshProfile();
     }
     // eslint-disable-next-line react-hooks/exhaustive-deps
@@ -242,15 +178,8 @@ export const DiscoverScreen: React.FC<DiscoverScreenProps> = ({
   useEffect(() => {
     if (profile?.id) {
       const hasChanged = previousProfileId.current !== profile.id;
-      console.log("DiscoverScreen: Profile check", {
-        currentId: profile.id,
-        previousId: previousProfileId.current,
-        hasChanged,
-        fullName: profile.full_name,
-      });
 
       if (hasChanged || !previousProfileId.current) {
-        console.log("DiscoverScreen: Profile ID changed, reloading matches");
         previousProfileId.current = profile.id;
         setProfiles([]);
         setCurrentIndex(0);
@@ -269,30 +198,22 @@ export const DiscoverScreen: React.FC<DiscoverScreenProps> = ({
     const targetProfile = profiles[currentIndex];
 
     if (!targetProfile) {
-      console.log("DiscoverScreen: No profile at current index");
       showToast("No profile to like", "error");
       return;
     }
 
     if (!profile) {
-      console.log("DiscoverScreen: No user profile available");
       showToast("Please complete your profile first", "error");
       return;
     }
 
     try {
-      console.log("DiscoverScreen: Attempting to like profile:", {
-        myProfileId: profile.id,
-        likedProfileId: targetProfile.id,
-      });
-
       const { error } = await UserService.likeUser(
         profile.id,
         targetProfile.id
       );
 
       if (error) {
-        console.error("DiscoverScreen: Like error:", error);
         showToast(
           `Failed to like: ${(error as any).message || "Unknown error"}`,
           "error"
@@ -300,7 +221,6 @@ export const DiscoverScreen: React.FC<DiscoverScreenProps> = ({
         return;
       }
 
-      console.log("DiscoverScreen: Successfully liked user");
       showToast("❤️ You liked this profile!", "success");
 
       // Remove from local list immediately
@@ -308,7 +228,6 @@ export const DiscoverScreen: React.FC<DiscoverScreenProps> = ({
       // Keep index bounded
       setCurrentIndex(0);
     } catch (err) {
-      console.error("DiscoverScreen: Unexpected error in handleLike:", err);
       showToast("An unexpected error occurred", "error");
     }
   }, [profiles, currentIndex, showToast, profile]);
@@ -317,42 +236,32 @@ export const DiscoverScreen: React.FC<DiscoverScreenProps> = ({
     const targetProfile = profiles[currentIndex];
 
     if (!targetProfile) {
-      console.log("DiscoverScreen: No profile at current index");
       showToast("No profile to pass", "error");
       return;
     }
 
     if (!profile) {
-      console.log("DiscoverScreen: No user profile available");
       showToast("Please complete your profile first", "error");
       return;
     }
 
     try {
-      console.log("DiscoverScreen: Attempting to dislike profile:", {
-        myProfileId: profile.id,
-        dislikedProfileId: targetProfile.id,
-      });
-
       const { error } = await UserService.dislikeUser(
         profile.id,
         targetProfile.id
       );
 
       if (error) {
-        console.error("DiscoverScreen: Dislike error:", error);
         showToast("Failed to pass. Please try again.", "error");
         return;
       }
 
-      console.log("DiscoverScreen: Successfully disliked profile");
       showToast("👋 Passed", "success");
 
       // Remove from local list immediately
       setProfiles((prev) => prev.filter((p) => p.id !== targetProfile.id));
       setCurrentIndex(0);
     } catch (err) {
-      console.error("DiscoverScreen: Unexpected error in handlePass:", err);
       showToast("An unexpected error occurred", "error");
     }
   }, [profiles, currentIndex, showToast, profile]);
@@ -454,8 +363,6 @@ export const DiscoverScreen: React.FC<DiscoverScreenProps> = ({
       </View>
     );
   }
-
-  console.log("DiscoverScreen: Rendering with profile:", profile);
 
   return (
     <>
@@ -574,19 +481,23 @@ export const DiscoverScreen: React.FC<DiscoverScreenProps> = ({
                   </View>
 
                   <View style={styles.actionButtons}>
-                    <TouchableOpacity
+                    <AnimatedTouchable
                       style={styles.passButton}
                       onPress={handlePass}
+                      hapticStyle="medium"
+                      scaleValue={0.9}
                     >
                       <Ionicons name="close" size={24} color="#FF6B6B" />
-                    </TouchableOpacity>
+                    </AnimatedTouchable>
 
-                    <TouchableOpacity
+                    <AnimatedTouchable
                       style={styles.likeButton}
                       onPress={handleLike}
+                      hapticStyle="medium"
+                      scaleValue={0.9}
                     >
                       <Ionicons name="heart" size={24} color="#fff" />
-                    </TouchableOpacity>
+                    </AnimatedTouchable>
                   </View>
                 </View>
               </TouchableOpacity>
@@ -643,12 +554,12 @@ const styles = StyleSheet.create({
   },
   cardContainer: {
     flex: 1,
-    paddingHorizontal: 24,
-    paddingTop: 20,
-    paddingBottom: 20,
+    paddingHorizontal: Spacing.lg,
+    paddingTop: Spacing.lg,
+    paddingBottom: Spacing.lg,
     alignItems: "center",
     justifyContent: "center",
-    backgroundColor: "#fafafa",
+    backgroundColor: Colors.background,
   },
   profileCard: {
     backgroundColor: "#fff",

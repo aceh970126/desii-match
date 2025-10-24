@@ -37,7 +37,6 @@ export const ImageUploader: React.FC<ImageUploaderProps> = ({
             style: "default",
             onPress: () => {
               // In a real app, you might want to open device settings
-              console.log("Open device settings");
             },
           },
         ]
@@ -48,32 +47,23 @@ export const ImageUploader: React.FC<ImageUploaderProps> = ({
   };
 
   const pickImage = async () => {
-    console.log("ImageUploader: Starting image picker from library");
     const hasPermission = await requestPermissions();
     if (!hasPermission) {
-      console.log("ImageUploader: Permission denied");
       return;
     }
 
     try {
-      console.log("ImageUploader: ImagePicker object:", ImagePicker);
-
       const result = await ImagePicker.launchImageLibraryAsync({
         allowsEditing: true,
         aspect: [1, 1],
         quality: 0.8,
       });
 
-      console.log("ImageUploader: Image picker result:", result);
-
       if (!result.canceled && result.assets[0]) {
-        console.log("ImageUploader: Image selected:", result.assets[0].uri);
         onImageSelected(result.assets[0].uri);
       } else {
-        console.log("ImageUploader: Image selection canceled or no assets");
       }
     } catch (error) {
-      console.error("ImageUploader: Error picking image:", error);
       Alert.alert(
         "❌ Image Selection Failed",
         "We couldn't load your selected image. Please try again or select a different photo.",
@@ -88,10 +78,8 @@ export const ImageUploader: React.FC<ImageUploaderProps> = ({
   };
 
   const takePhoto = async () => {
-    console.log("ImageUploader: Starting camera");
     const { status } = await ImagePicker.requestCameraPermissionsAsync();
     if (status !== "granted") {
-      console.log("ImageUploader: Camera permission denied");
       Alert.alert(
         "📸 Camera Permission Required",
         "We need access to your camera to take photos. Please enable this permission in your device settings.",
@@ -105,7 +93,6 @@ export const ImageUploader: React.FC<ImageUploaderProps> = ({
             style: "default",
             onPress: () => {
               // In a real app, you might want to open device settings
-              console.log("Open device settings");
             },
           },
         ]
@@ -120,16 +107,11 @@ export const ImageUploader: React.FC<ImageUploaderProps> = ({
         quality: 0.8,
       });
 
-      console.log("ImageUploader: Camera result:", result);
-
       if (!result.canceled && result.assets[0]) {
-        console.log("ImageUploader: Photo taken:", result.assets[0].uri);
         onImageSelected(result.assets[0].uri);
       } else {
-        console.log("ImageUploader: Photo canceled or no assets");
       }
     } catch (error) {
-      console.error("ImageUploader: Error taking photo:", error);
       Alert.alert(
         "❌ Camera Failed",
         "We couldn't take your photo. Please try again or use the photo library instead.",
@@ -144,7 +126,6 @@ export const ImageUploader: React.FC<ImageUploaderProps> = ({
   };
 
   const showImagePicker = () => {
-    console.log("ImageUploader: Showing image picker options");
     Alert.alert(
       "📷 Add Your Photo",
       "Choose how you'd like to add your avatar photo",

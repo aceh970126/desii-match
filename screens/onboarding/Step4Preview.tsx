@@ -83,7 +83,7 @@ export const Step4Preview: React.FC<Step4PreviewProps> = ({ navigation }) => {
         });
 
       if (error) {
-        console.error("Supabase upload error:", error);
+        console.log("Supabase upload error:", error);
         throw error;
       }
 
@@ -96,7 +96,7 @@ export const Step4Preview: React.FC<Step4PreviewProps> = ({ navigation }) => {
       console.log("Public URL generated:", publicData.publicUrl);
       return publicData.publicUrl;
     } catch (error) {
-      console.error("Error uploading avatar:", error);
+      console.log("Error uploading avatar:", error);
       return null;
     }
   };

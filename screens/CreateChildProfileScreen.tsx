@@ -105,7 +105,7 @@ export const CreateChildProfileScreen: React.FC<
       });
 
       if (error) {
-        console.error("Error creating profile:", error);
+        console.log("Error creating profile:", error);
 
         // Check for foreign key constraint error
         if ((error as any).code === "23503") {
@@ -121,7 +121,7 @@ export const CreateChildProfileScreen: React.FC<
         navigation.goBack();
       }
     } catch (error) {
-      console.error("Exception creating profile:", error);
+      console.log("Exception creating profile:", error);
       showToast("Failed to create profile", "error");
     } finally {
       setLoading(false);

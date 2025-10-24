@@ -88,7 +88,7 @@ const MainTabsContent: React.FC = () => {
 
       setIsFamilyAccount(profile?.account_type === "family");
     } catch (error) {
-      console.error("Error loading user profile:", error);
+      console.log("Error loading user profile:", error);
     }
   }, []);
 
@@ -144,7 +144,7 @@ const MainTabsContent: React.FC = () => {
       console.log(`MainTabs: Total unread count: ${totalUnread}`);
       setUnreadCount(totalUnread);
     } catch (error) {
-      console.error("MainTabs: Error loading unread count:", error);
+      console.log("MainTabs: Error loading unread count:", error);
     }
   }, []);
 

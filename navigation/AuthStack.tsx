@@ -21,8 +21,6 @@ interface AuthStackProps {
 export const AuthStack: React.FC<AuthStackProps> = ({
   initialRoute = "SignIn",
 }) => {
-  console.log("AuthStack: Rendering with", initialRoute, "as initial route");
-
   return (
     <Stack.Navigator
       initialRouteName={initialRoute}

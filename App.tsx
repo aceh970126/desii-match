@@ -4,8 +4,20 @@ import "./utils/polyfills";
 import { NavigationContainer } from "@react-navigation/native";
 import { StatusBar } from "expo-status-bar";
 import React, { useEffect, useState } from "react";
-import { AppState, AppStateStatus, StyleSheet, Text, View } from "react-native";
+import {
+  Animated,
+  AppState,
+  AppStateStatus,
+  StyleSheet,
+  Text,
+  View,
+} from "react-native";
+import { BackgroundPattern } from "./components/BackgroundPattern";
 import { ErrorBoundary } from "./components/ErrorBoundary";
+import { GradientBackground } from "./components/GradientBackground";
+import { ProfessionalLoading } from "./components/ProfessionalLoading";
+import { ProfessionalLogo } from "./components/ProfessionalLogo";
+import { Colors, Spacing, Typography } from "./constants/design";
 import { OnboardingProvider } from "./contexts/OnboardingContext";
 import { ProfileProvider } from "./contexts/ProfileContext";
 import {
@@ -25,10 +37,24 @@ const AppContent: React.FC = () => {
   const [user, setUser] = useState<User | null>(null);
   const [profile, setProfile] = useState<Profile | null>(null);
   const [loading, setLoading] = useState(true);
+  const [showSplash, setShowSplash] = useState(true);
   const { refreshTrigger } = useProfileRefresh();
+
+  // Animation values for loading screen
+  const pulseAnim = React.useRef(new Animated.Value(1)).current;
+  const fadeAnim = React.useRef(new Animated.Value(0)).current;
 
   // Create a navigation reference to control navigation programmatically
   const navigationRef = React.useRef<any>(null);
+
+  // Handle splash screen delay
+  useEffect(() => {
+    const splashTimer = setTimeout(() => {
+      setShowSplash(false);
+    }, 0); // No delay - immediate transition
+
+    return () => clearTimeout(splashTimer);
+  }, []);
 
   // Function to update user presence using upsert (handles both insert and update)
   const updateUserPresence = async (profileId: string, online: boolean) => {
@@ -204,6 +230,7 @@ const AppContent: React.FC = () => {
                   bio: "",
                   interests: [],
                   avatar: "",
+                  is_active: true,
                   created_at: new Date().toISOString(),
                   updated_at: new Date().toISOString(),
                 });
@@ -391,6 +418,39 @@ const AppContent: React.FC = () => {
     };
   }, [user]);
 
+  // Start loading animations
+  useEffect(() => {
+    if (loading) {
+      // Fade in animation
+      Animated.timing(fadeAnim, {
+        toValue: 1,
+        duration: 800,
+        useNativeDriver: true,
+      }).start();
+
+      // Pulse animation
+      const pulseAnimation = Animated.loop(
+        Animated.sequence([
+          Animated.timing(pulseAnim, {
+            toValue: 1.1,
+            duration: 1000,
+            useNativeDriver: true,
+          }),
+          Animated.timing(pulseAnim, {
+            toValue: 1,
+            duration: 1000,
+            useNativeDriver: true,
+          }),
+        ])
+      );
+      pulseAnimation.start();
+
+      return () => {
+        pulseAnimation.stop();
+      };
+    }
+  }, [loading, fadeAnim, pulseAnim]);
+
   useEffect(() => {
     // Test Supabase connection on app start
     const runTests = async () => {
@@ -474,6 +534,7 @@ const AppContent: React.FC = () => {
                 bio: "",
                 interests: [],
                 avatar: "",
+                is_active: true,
                 created_at: new Date().toISOString(),
                 updated_at: new Date().toISOString(),
               });
@@ -518,7 +579,8 @@ const AppContent: React.FC = () => {
     const timeoutId = setTimeout(() => {
       logger.log("App: Safety timeout triggered, forcing loading to false");
       setLoading(false);
-    }, 5000);
+      setShowSplash(false);
+    }, 5000); // 5 seconds safety timeout
 
     // Listen for auth changes
     const {
@@ -631,14 +693,25 @@ const AppContent: React.FC = () => {
     return "AuthStack";
   };
 
-  if (loading) {
+  if (loading || showSplash) {
     return (
-      <View style={styles.loadingContainer}>
-        <Text style={styles.loveIcon}>💕</Text>
-        <Text style={styles.loadingText}>DesiiMatch</Text>
-        <Text style={styles.loadingSubtext}>Loading...</Text>
-        <StatusBar style="auto" />
-      </View>
+      <GradientBackground colors={Colors.gradientPrimary}>
+        <BackgroundPattern variant="circles" intensity="subtle" />
+        <View style={styles.loadingContainer}>
+          <ProfessionalLogo size="large" animated={true} />
+          <Animated.View
+            style={[styles.loadingIndicator, { opacity: fadeAnim }]}
+          >
+            <ProfessionalLoading
+              size="medium"
+              color={Colors.white}
+              variant="wave"
+            />
+            <Text style={styles.loadingSubtext}>Loading...</Text>
+          </Animated.View>
+          <StatusBar style="light" />
+        </View>
+      </GradientBackground>
     );
   }
 
@@ -685,22 +758,21 @@ const styles = StyleSheet.create({
     flex: 1,
     justifyContent: "center",
     alignItems: "center",
-    backgroundColor: "#fafafa",
+    paddingHorizontal: Spacing.xl,
   },
-  loveIcon: {
-    fontSize: 72,
-    marginBottom: 20,
-  },
-  loadingText: {
-    fontSize: 32,
-    fontWeight: "700",
-    color: "#1a1a1a",
-    marginBottom: 8,
-    letterSpacing: -0.5,
+  loadingIndicator: {
+    alignItems: "center",
+    marginTop: Spacing["4xl"],
   },
   loadingSubtext: {
-    fontSize: 14,
-    color: "#999",
-    fontWeight: "400",
+    fontSize: Typography.fontSize.sm,
+    color: Colors.white,
+    fontWeight: Typography.fontWeight.regular,
+    opacity: 0.9,
+    letterSpacing: 1,
+    marginTop: Spacing.md,
+    textShadowColor: "rgba(0, 0, 0, 0.3)",
+    textShadowOffset: { width: 0, height: 1 },
+    textShadowRadius: 2,
   },
 });

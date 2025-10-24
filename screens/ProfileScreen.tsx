@@ -144,7 +144,7 @@ export const ProfileScreen: React.FC<ProfileScreenProps> = ({ navigation }) => {
       );
 
       if (error) {
-        console.error("ProfileScreen: Error loading profile:", error);
+        console.log("ProfileScreen: Error loading profile:", error);
         showToast("Failed to load profile", "error");
         setLoading(false);
         return;
@@ -172,7 +172,7 @@ export const ProfileScreen: React.FC<ProfileScreenProps> = ({ navigation }) => {
       console.log("ProfileScreen: Profile loaded successfully");
       setLoading(false);
     } catch (err) {
-      console.error("ProfileScreen: Exception loading profile:", err);
+      console.log("ProfileScreen: Exception loading profile:", err);
       showToast("An unexpected error occurred", "error");
       setLoading(false);
     } finally {
@@ -240,7 +240,7 @@ export const ProfileScreen: React.FC<ProfileScreenProps> = ({ navigation }) => {
         });
 
       if (error) {
-        console.error("Supabase upload error:", error);
+        console.log("Supabase upload error:", error);
         throw error;
       }
 
@@ -253,7 +253,7 @@ export const ProfileScreen: React.FC<ProfileScreenProps> = ({ navigation }) => {
       console.log("Public URL generated:", publicData.publicUrl);
       return publicData.publicUrl;
     } catch (error) {
-      console.error("Error uploading avatar:", error);
+      console.log("Error uploading avatar:", error);
       return null;
     }
   };
@@ -313,7 +313,7 @@ export const ProfileScreen: React.FC<ProfileScreenProps> = ({ navigation }) => {
         .eq("id", activeProfile.id);
 
       if (error) {
-        console.error("Error updating profile:", error);
+        console.log("Error updating profile:", error);
         showToast("Failed to update profile", "error");
         return;
       }
@@ -325,7 +325,7 @@ export const ProfileScreen: React.FC<ProfileScreenProps> = ({ navigation }) => {
       // Trigger profile refresh across all screens
       triggerProfileRefresh();
     } catch (error) {
-      console.error("Error saving profile:", error);
+      console.log("Error saving profile:", error);
       showToast("An unexpected error occurred", "error");
     } finally {
       setSaving(false);

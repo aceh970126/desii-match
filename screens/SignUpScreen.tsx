@@ -116,7 +116,6 @@ export const SignUpScreen: React.FC<SignUpScreenProps> = ({ navigation }) => {
         setTimeout(() => navigation.navigate("Step0AccountType"), 100);
       }
     } catch (profileError) {
-      console.error("SignUp: Error checking profile:", profileError);
       setTimeout(() => navigation.navigate("Step0AccountType"), 100);
     }
   };

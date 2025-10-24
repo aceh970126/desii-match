@@ -13,8 +13,10 @@
       "supportsTablet": true,
       "infoPlist": {
         "NSCameraUsageDescription": "This app needs access to camera to take profile photos.",
-        "NSPhotoLibraryUsageDescription": "This app needs access to photo library to select profile photos."
-      }
+        "NSPhotoLibraryUsageDescription": "This app needs access to photo library to select profile photos.",
+        "ITSAppUsesNonExemptEncryption": false
+      },
+      "bundleIdentifier": "com.twistzz.desiimatch"
     },
     "android": {
       "adaptiveIcon": {
@@ -46,9 +48,9 @@
           "image": "./assets/images/splash-icon.png",
           "imageWidth": 200,
           "resizeMode": "contain",
-          "backgroundColor": "#ffffff",
+          "backgroundColor": "#FF6B6B",
           "dark": {
-            "backgroundColor": "#000000"
+            "backgroundColor": "#FF6B6B"
           }
         }
       ],
@@ -58,6 +60,12 @@
     ],
     "experiments": {
       "reactCompiler": true
+    },
+    "extra": {
+      "router": {},
+      "eas": {
+        "projectId": "7ba68ccf-1d51-4c2a-aa58-d7141e3d226b"
+      }
     }
   }
 }

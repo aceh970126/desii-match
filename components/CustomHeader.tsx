@@ -74,9 +74,7 @@ export const CustomHeader: React.FC<CustomHeaderProps> = ({
                 <Image
                   source={{ uri: userProfile.avatar }}
                   style={styles.headerAvatar}
-                  onError={() => {
-                    console.log("CustomHeader: Avatar image failed to load");
-                  }}
+                  onError={() => {}}
                 />
               ) : (
                 <View style={styles.headerAvatarPlaceholder}>

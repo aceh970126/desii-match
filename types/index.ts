@@ -5,6 +5,9 @@
 
 import { User as SupabaseUser } from "@supabase/supabase-js";
 
+// Import Profile from supabaseClient for use in this file
+import { Profile as SupabaseProfile } from "../services/supabaseClient";
+
 // Re-export Supabase User type
 export type User = SupabaseUser;
 
@@ -30,7 +33,7 @@ export type RootStackParamList = {
   Chat: undefined;
   Profile: undefined;
   Conversation: { chat: ChatData };
-  UserDetail: { profile: Profile; userProfile?: Profile };
+  UserDetail: { profile: SupabaseProfile; userProfile?: SupabaseProfile };
 };
 
 // Chat types
@@ -69,6 +72,6 @@ export interface ValidationResult {
 // App state types
 export interface AppState {
   user: User | null;
-  profile: Profile | null;
+  profile: SupabaseProfile | null;
   loading: boolean;
 }

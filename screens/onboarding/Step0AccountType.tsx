@@ -73,7 +73,7 @@ export const Step0AccountType: React.FC<Step0AccountTypeProps> = ({
         }
       }
     } catch (error) {
-      console.error("Error checking existing profile:", error);
+      console.log("Error checking existing profile:", error);
     } finally {
       setChecking(false);
     }
@@ -106,7 +106,7 @@ export const Step0AccountType: React.FC<Step0AccountTypeProps> = ({
         navigation.navigate("Step1Profile");
       }
     } catch (error) {
-      console.error("Exception in Step0AccountType:", error);
+      console.log("Exception in Step0AccountType:", error);
       showToast("An unexpected error occurred", "error");
     } finally {
       setLoading(false);

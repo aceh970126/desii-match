@@ -24,26 +24,18 @@ export const MainLayout: React.FC<MainLayoutProps> = ({
   const [showSignOutDialog, setShowSignOutDialog] = useState(false);
 
   const handleLogout = () => {
-    console.log(
-      "MainLayout: handleLogout called - showing confirmation dialog"
-    );
     setShowSignOutDialog(true);
   };
 
   const confirmSignOut = async () => {
-    console.log("MainLayout: confirmSignOut called");
     try {
       const { error } = await UserService.signOut();
-      console.log("MainLayout: signOut result:", { error });
       if (error) {
-        console.error("MainLayout: Sign out error:", error);
         showToast("Failed to sign out", "error");
       } else {
-        console.log("MainLayout: Sign out successful");
         showToast("Signed out successfully", "success");
       }
     } catch (err) {
-      console.error("MainLayout: Logout exception:", err);
       showToast("An unexpected error occurred", "error");
     } finally {
       setShowSignOutDialog(false);
@@ -51,7 +43,6 @@ export const MainLayout: React.FC<MainLayoutProps> = ({
   };
 
   const cancelSignOut = () => {
-    console.log("MainLayout: Sign out cancelled");
     setShowSignOutDialog(false);
   };
 

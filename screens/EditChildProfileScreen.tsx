@@ -82,7 +82,7 @@ export const EditChildProfileScreen: React.FC<EditChildProfileScreenProps> = ({
       const { data, error } = await UserService.getManagedProfiles();
 
       if (error) {
-        console.error("Error loading profiles:", error);
+        console.log("Error loading profiles:", error);
         showToast("Failed to load profile", "error");
         navigation.goBack();
         return;
@@ -105,7 +105,7 @@ export const EditChildProfileScreen: React.FC<EditChildProfileScreenProps> = ({
         interests: foundProfile.interests || [],
       });
     } catch (error) {
-      console.error("Exception loading profile:", error);
+      console.log("Exception loading profile:", error);
       showToast("Failed to load profile", "error");
       navigation.goBack();
     } finally {
@@ -158,14 +158,14 @@ export const EditChildProfileScreen: React.FC<EditChildProfileScreenProps> = ({
       });
 
       if (error) {
-        console.error("Error updating profile:", error);
+        console.log("Error updating profile:", error);
         showToast("Failed to update profile", "error");
       } else {
         showToast("Profile updated successfully!", "success");
         navigation.goBack();
       }
     } catch (error) {
-      console.error("Exception updating profile:", error);
+      console.log("Exception updating profile:", error);
       showToast("Failed to update profile", "error");
     } finally {
       setSaving(false);
@@ -191,14 +191,14 @@ export const EditChildProfileScreen: React.FC<EditChildProfileScreenProps> = ({
               const { error } = await UserService.deleteFamilyProfile(childId);
 
               if (error) {
-                console.error("Error deleting profile:", error);
+                console.log("Error deleting profile:", error);
                 showToast("Failed to delete profile", "error");
               } else {
                 showToast("Profile deleted successfully", "success");
                 navigation.goBack();
               }
             } catch (error) {
-              console.error("Exception deleting profile:", error);
+              console.log("Exception deleting profile:", error);
               showToast("Failed to delete profile", "error");
             }
           },

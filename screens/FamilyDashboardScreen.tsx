@@ -11,6 +11,7 @@ import {
   TouchableOpacity,
   View,
 } from "react-native";
+import { AnimatedTouchable } from "../components/AnimatedTouchable";
 import { useProfile } from "../contexts/ProfileContext";
 import { useProfileRefresh } from "../contexts/ProfileRefreshContext";
 import { useToast } from "../contexts/ToastContext";
@@ -37,17 +38,14 @@ export const FamilyDashboardScreen: React.FC<FamilyDashboardScreenProps> = ({
       const { data, error } = await UserService.getManagedProfiles();
 
       if (error) {
-        console.error("Error loading profiles:", error);
         showToast("Failed to load profiles", "error");
       } else {
         setProfiles(data || []);
 
         // Refresh active profile context to ensure it's up to date
         await refreshProfile();
-        console.log("FamilyDashboard: Active profile context refreshed");
       }
     } catch (error) {
-      console.error("Exception loading profiles:", error);
       showToast("Failed to load profiles", "error");
     } finally {
       setLoading(false);
@@ -74,7 +72,6 @@ export const FamilyDashboardScreen: React.FC<FamilyDashboardScreenProps> = ({
       const { error } = await UserService.activateProfile(profileId);
 
       if (error) {
-        console.error("Error activating profile:", error);
         showToast("Failed to activate profile", "error");
       } else {
         showToast("Profile activated successfully", "success");
@@ -83,7 +80,6 @@ export const FamilyDashboardScreen: React.FC<FamilyDashboardScreenProps> = ({
         triggerProfileRefresh(); // Trigger global refresh
       }
     } catch (error) {
-      console.error("Exception activating profile:", error);
       showToast("Failed to activate profile", "error");
     }
   };
@@ -117,7 +113,6 @@ export const FamilyDashboardScreen: React.FC<FamilyDashboardScreenProps> = ({
               );
 
               if (error) {
-                console.error("Error deleting profile:", error);
                 showToast("Failed to delete profile", "error");
               } else {
                 showToast("Profile deleted successfully", "success");
@@ -126,7 +121,6 @@ export const FamilyDashboardScreen: React.FC<FamilyDashboardScreenProps> = ({
                 triggerProfileRefresh(); // Trigger global refresh
               }
             } catch (error) {
-              console.error("Exception deleting profile:", error);
               showToast("Failed to delete profile", "error");
             }
           },
@@ -137,20 +131,15 @@ export const FamilyDashboardScreen: React.FC<FamilyDashboardScreenProps> = ({
 
   const handleContinueToApp = async () => {
     try {
-      console.log("FamilyDashboard: Continue to app clicked");
-
       // Refresh the active profile context to use the active child
       await refreshProfile();
-      console.log("FamilyDashboard: Active profile refreshed");
 
       // Trigger profile refresh to show main app
       // This will cause App.tsx to re-check the profile
       triggerProfileRefresh();
-      console.log("FamilyDashboard: Profile refresh triggered");
 
       showToast("Loading main app...", "success");
     } catch (error) {
-      console.error("FamilyDashboard: Error continuing to app:", error);
       showToast("Failed to continue", "error");
     }
   };
@@ -228,28 +217,34 @@ export const FamilyDashboardScreen: React.FC<FamilyDashboardScreenProps> = ({
         {/* Action Buttons */}
         <View style={styles.actionsRow}>
           {!isActive && (
-            <TouchableOpacity
+            <AnimatedTouchable
               style={styles.activateButton}
               onPress={() => handleActivateProfile(item.id)}
+              hapticStyle="medium"
+              scaleValue={0.9}
             >
               <Ionicons name="play" size={20} color="#fff" />
-            </TouchableOpacity>
+            </AnimatedTouchable>
           )}
-          <TouchableOpacity
+          <AnimatedTouchable
             style={styles.editButton}
             onPress={() => handleEditProfile(item.id)}
+            hapticStyle="light"
+            scaleValue={0.9}
           >
             <Ionicons name="pencil" size={20} color="#FF6B6B" />
-          </TouchableOpacity>
+          </AnimatedTouchable>
           {!isPrimary && (
-            <TouchableOpacity
+            <AnimatedTouchable
               style={styles.deleteButton}
               onPress={() =>
                 handleDeleteProfile(item.id, item.full_name, isPrimary)
               }
+              hapticStyle="medium"
+              scaleValue={0.9}
             >
               <Ionicons name="trash" size={20} color="#FF6B6B" />
-            </TouchableOpacity>
+            </AnimatedTouchable>
           )}
         </View>
       </View>

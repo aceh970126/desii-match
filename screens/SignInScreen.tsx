@@ -113,7 +113,7 @@ export const SignInScreen: React.FC<SignInScreenProps> = ({ navigation }) => {
             setTimeout(() => navigation.navigate("Step0AccountType"), 100);
           }
         } catch (profileError) {
-          console.error("SignIn: Error checking profile:", profileError);
+          console.log("SignIn: Error checking profile:", profileError);
           // Fallback to account type selection
           setTimeout(() => navigation.navigate("Step0AccountType"), 100);
         }
@@ -173,7 +173,7 @@ export const SignInScreen: React.FC<SignInScreenProps> = ({ navigation }) => {
         setTimeout(() => navigation.navigate("Step0AccountType"), 100);
       }
     } catch (profileError) {
-      console.error("SignIn: Error checking profile:", profileError);
+      console.log("SignIn: Error checking profile:", profileError);
       // Fallback to account type selection
       setTimeout(() => navigation.navigate("Step0AccountType"), 100);
     }

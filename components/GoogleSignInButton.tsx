@@ -39,7 +39,6 @@ export const GoogleSignInButton: React.FC<GoogleSignInButtonProps> = ({
       });
 
       if (error) {
-        console.error("Google sign-in error:", error);
         setLoading(false);
         return;
       }
@@ -51,7 +50,6 @@ export const GoogleSignInButton: React.FC<GoogleSignInButtonProps> = ({
       setLoading(false);
       onSuccess?.();
     } catch (e) {
-      console.error("Google sign-in exception:", e);
       setLoading(false);
     }
   }, [onSuccess]);

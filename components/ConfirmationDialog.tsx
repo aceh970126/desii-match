@@ -4,10 +4,10 @@ import {
   Modal,
   StyleSheet,
   Text,
-  TouchableOpacity,
   TouchableWithoutFeedback,
   View,
 } from "react-native";
+import { AnimatedTouchable } from "./AnimatedTouchable";
 
 interface ConfirmationDialogProps {
   visible: boolean;
@@ -92,24 +92,26 @@ export const ConfirmationDialog: React.FC<ConfirmationDialogProps> = ({
               <Text style={styles.message}>{message}</Text>
 
               <View style={styles.buttonContainer}>
-                <TouchableOpacity
+                <AnimatedTouchable
                   style={styles.cancelButton}
                   onPress={onCancel}
-                  activeOpacity={0.7}
+                  hapticStyle="light"
+                  scaleValue={0.95}
                 >
                   <Text style={styles.cancelButtonText}>{cancelText}</Text>
-                </TouchableOpacity>
+                </AnimatedTouchable>
 
-                <TouchableOpacity
+                <AnimatedTouchable
                   style={[
                     styles.confirmButton,
                     { backgroundColor: getConfirmButtonColor() },
                   ]}
                   onPress={onConfirm}
-                  activeOpacity={0.8}
+                  hapticStyle="medium"
+                  scaleValue={0.95}
                 >
                   <Text style={styles.confirmButtonText}>{confirmText}</Text>
-                </TouchableOpacity>
+                </AnimatedTouchable>
               </View>
             </View>
           </TouchableWithoutFeedback>

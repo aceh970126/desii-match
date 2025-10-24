@@ -11,6 +11,7 @@ import {
   TouchableOpacity,
   View,
 } from "react-native";
+import { AnimatedTouchable } from "../components/AnimatedTouchable";
 import { useProfile } from "../contexts/ProfileContext";
 import { useToast } from "../contexts/ToastContext";
 import { supabase } from "../services/supabaseClient";
@@ -164,7 +165,7 @@ export const ConversationScreen: React.FC<ConversationScreenProps> = ({
 
       setLoading(false);
     } catch (error) {
-      console.error("ConversationScreen: Error initializing chat:", error);
+      console.log("ConversationScreen: Error initializing chat:", error);
       showToast("Failed to load conversation", "error");
       setLoading(false);
     }
@@ -202,7 +203,7 @@ export const ConversationScreen: React.FC<ConversationScreenProps> = ({
         .single();
 
       if (createError) {
-        console.error(
+        console.log(
           "ConversationScreen: Error creating conversation:",
           createError
         );
@@ -212,7 +213,7 @@ export const ConversationScreen: React.FC<ConversationScreenProps> = ({
       console.log("ConversationScreen: Created new conversation:", newConv.id);
       return newConv.id;
     } catch (error) {
-      console.error(
+      console.log(
         "ConversationScreen: Exception in getOrCreateConversation:",
         error
       );
@@ -229,7 +230,7 @@ export const ConversationScreen: React.FC<ConversationScreenProps> = ({
         .order("created_at", { ascending: true });
 
       if (error) {
-        console.error("ConversationScreen: Error loading messages:", error);
+        console.log("ConversationScreen: Error loading messages:", error);
         return;
       }
 
@@ -261,7 +262,7 @@ export const ConversationScreen: React.FC<ConversationScreenProps> = ({
         flatListRef.current?.scrollToEnd({ animated: true });
       }, 300);
     } catch (error) {
-      console.error("ConversationScreen: Exception loading messages:", error);
+      console.log("ConversationScreen: Exception loading messages:", error);
     }
   };
 
@@ -287,7 +288,7 @@ export const ConversationScreen: React.FC<ConversationScreenProps> = ({
         .select();
 
       if (error) {
-        console.error(
+        console.log(
           "ConversationScreen: Error marking messages as read:",
           error
         );
@@ -300,7 +301,7 @@ export const ConversationScreen: React.FC<ConversationScreenProps> = ({
         console.log("ConversationScreen: Messages marked:", data);
       }
     } catch (error) {
-      console.error(
+      console.log(
         "ConversationScreen: Exception marking messages as read:",
         error
       );
@@ -317,10 +318,7 @@ export const ConversationScreen: React.FC<ConversationScreenProps> = ({
         .maybeSingle();
 
       if (error) {
-        console.error(
-          "ConversationScreen: Error loading user presence:",
-          error
-        );
+        console.log("ConversationScreen: Error loading user presence:", error);
         setIsOnline(false);
         return;
       }
@@ -329,7 +327,7 @@ export const ConversationScreen: React.FC<ConversationScreenProps> = ({
       console.log("ConversationScreen: Presence data:", data);
       setIsOnline(data?.online || false);
     } catch (error) {
-      console.error(
+      console.log(
         "ConversationScreen: Exception loading user presence:",
         error
       );
@@ -593,7 +591,7 @@ export const ConversationScreen: React.FC<ConversationScreenProps> = ({
         .single();
 
       if (error) {
-        console.error("ConversationScreen: Error sending message:", error);
+        console.log("ConversationScreen: Error sending message:", error);
         showToast("Failed to send message", "error");
         // Remove optimistic message
         setMessages((prev) => prev.filter((m) => m.id !== tempId));
@@ -642,7 +640,7 @@ export const ConversationScreen: React.FC<ConversationScreenProps> = ({
       isSendingRef.current = false;
       setIsSending(false);
     } catch (error) {
-      console.error("ConversationScreen: Exception sending message:", error);
+      console.log("ConversationScreen: Exception sending message:", error);
       showToast("Failed to send message", "error");
       // Remove optimistic message
       setMessages((prev) => prev.filter((m) => m.id !== tempId));
@@ -816,7 +814,7 @@ export const ConversationScreen: React.FC<ConversationScreenProps> = ({
             enablesReturnKeyAutomatically={false}
             blurOnSubmit={false}
           />
-          <TouchableOpacity
+          <AnimatedTouchable
             style={[
               styles.sendButton,
               (!newMessage.trim() || isSending) && styles.sendButtonDisabled,
@@ -832,13 +830,15 @@ export const ConversationScreen: React.FC<ConversationScreenProps> = ({
               }
             }}
             disabled={!newMessage.trim() || isSending}
+            hapticStyle="light"
+            scaleValue={0.9}
           >
             <Ionicons
               name="send"
               size={20}
               color={newMessage.trim() && !isSending ? "#fff" : "#ccc"}
             />
-          </TouchableOpacity>
+          </AnimatedTouchable>
         </View>
       </View>
     </View>

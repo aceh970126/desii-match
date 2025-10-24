@@ -47,12 +47,12 @@ export const ProfileSwitcher: React.FC<ProfileSwitcherProps> = ({
       const profilesResult = await UserService.getManagedProfiles();
 
       if (profilesResult.error) {
-        console.error("Error loading managed profiles:", profilesResult.error);
+        console.log("Error loading managed profiles:", profilesResult.error);
       } else {
         setManagedProfiles(profilesResult.data || []);
       }
     } catch (error) {
-      console.error("Exception loading profiles:", error);
+      console.log("Exception loading profiles:", error);
     } finally {
       setLoading(false);
     }
@@ -89,7 +89,7 @@ export const ProfileSwitcher: React.FC<ProfileSwitcherProps> = ({
               }
             );
           if (offlineError) {
-            console.error(
+            console.log(
               "ProfileSwitcher: Error setting old profile offline:",
               offlineError
             );
@@ -99,7 +99,7 @@ export const ProfileSwitcher: React.FC<ProfileSwitcherProps> = ({
             );
           }
         } catch (presenceError) {
-          console.error(
+          console.log(
             "ProfileSwitcher: Exception setting old profile offline:",
             presenceError
           );
@@ -110,7 +110,7 @@ export const ProfileSwitcher: React.FC<ProfileSwitcherProps> = ({
       const { error } = await UserService.activateProfile(profileId);
 
       if (error) {
-        console.error("ProfileSwitcher: Error switching profile:", error);
+        console.log("ProfileSwitcher: Error switching profile:", error);
         showToast("Failed to switch profile", "error");
       } else {
         console.log(
@@ -133,7 +133,7 @@ export const ProfileSwitcher: React.FC<ProfileSwitcherProps> = ({
               }
             );
           if (onlineError) {
-            console.error(
+            console.log(
               "ProfileSwitcher: Error setting new profile online:",
               onlineError
             );
@@ -143,7 +143,7 @@ export const ProfileSwitcher: React.FC<ProfileSwitcherProps> = ({
             );
           }
         } catch (presenceError) {
-          console.error(
+          console.log(
             "ProfileSwitcher: Exception setting new profile online:",
             presenceError
           );
@@ -164,7 +164,7 @@ export const ProfileSwitcher: React.FC<ProfileSwitcherProps> = ({
         onProfileSwitched?.();
       }
     } catch (error) {
-      console.error("ProfileSwitcher: Exception switching profile:", error);
+      console.log("ProfileSwitcher: Exception switching profile:", error);
       showToast("Failed to switch profile", "error");
     } finally {
       setSwitching(null);
